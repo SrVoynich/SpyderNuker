@@ -1,11 +1,11 @@
 # SpyderNuker
-#Librerias necesarias
+#Librerias necesarias:
 discord.py & asyncio
 
-#windows 10/11
+#windows 10/11:
 pip install discord.py & asyncio
 
-#Linux
+#Linux:
 python3 -m venv venv / source venv/bin/activate / pip install discord.py & asyncio
 
 Opciones disponibles => Nuker basico 
